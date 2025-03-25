@@ -11,10 +11,15 @@ use Filament\Forms\Components\Repeater;
 use Illuminate\Support\Facades\DB;
 use App\Filament\Resources\Log;
 use Dom\Text;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -24,7 +29,7 @@ use function Illuminate\Log\log;
 class VentaResource extends Resource
 {
     protected static ?string $model = Venta::class;
-
+    protected static ?string $navigationGroup = 'Tienda';
     protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
 
     public static function form(Form $form): Form
@@ -53,10 +58,10 @@ class VentaResource extends Resource
                 Forms\Components\DatePicker::make('fecha')
                     ->default(now()) // Fecha automática
                     ->required(),
-                Forms\Components\TextInput::make('total')
+                TextInput::make('total')
                     ->label('Total')
                     ->numeric()
-                    ->default(0) // Inicialmente 0
+                    ->default(0)
                     ->disabled()
                     ->dehydrated()
                     ->suffix('$')
@@ -64,7 +69,7 @@ class VentaResource extends Resource
                         // Formatear el valor al cargar el estado
                         $component->state(number_format($state, 2));
                     }),
-                Forms\Components\Repeater::make('detalles')
+                Repeater::make('detalles')
                     ->label('Productos')
                     ->relationship('detalles')
                     ->schema([
@@ -83,7 +88,7 @@ class VentaResource extends Resource
                                     $set('precio_unit', $producto->precio);
                                 }
                             }),
-                        Forms\Components\TextInput::make('cantidad')
+                        TextInput::make('cantidad')
                             ->label('Cantidad')
                             ->numeric()
                             ->minValue(1)
@@ -92,7 +97,7 @@ class VentaResource extends Resource
                         Forms\Components\TextInput::make('precio_unit')
                             ->label('Precio Unitario')
                             ->numeric()
-                            ->disabled() // Mejor que readonly para evitar edición
+                            ->disabled()
                             ->dehydrated()
                             ->reactive(),
                     ])
@@ -116,18 +121,35 @@ class VentaResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('cliente.nombre')
-                    ->label('Cliente'),
-                Tables\Columns\TextColumn::make('fecha')->date()->label('Fecha de Venta'),
-                Tables\Columns\TextColumn::make('total')
+                TextColumn::make('cliente.nombre')
+                    ->label('Clientes')
+                    ->searchable(),
+                TextColumn::make('fecha')->date()->label('Fecha de Venta')
+                    ->sortable(),
+                TextColumn::make('total')
+                    ->sortable()
                     ->label('Total de la Venta')
                     ->money('COP')
                     ->badge()
                     ->color('success')
                     ->formatStateUsing(fn($record) => '$' . number_format($record->total, 2)),
+                TextColumn::make('detalles')
+                    ->label('Resumen de Compra')
+                    ->getStateUsing(fn($record) => $record->productos->count() > 0
+                        ? $record->productos
+                        ->map(fn($p) => "{$p->nombre} ({$p->pivot->cantidad})")
+                        ->join(', ')
+                        : 'Sin productos')
+                    ->tooltip(fn($record) => $record->productos->count() > 0
+                        ? $record->productos
+                        ->map(fn($p) => "{$p->nombre}: {$p->pivot->cantidad} unidades")
+                        ->join("\n")
+                        : 'No hay productos en esta venta')
+                    ->limit(30),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -138,7 +160,7 @@ class VentaResource extends Resource
     public static function getRelations(): array
     {
         return [
-            /* RelationManagers\ProductosRelationManager::class, */
+            RelationManagers\ProductosRelationManager::class,
         ];
     }
 

@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class ProductoResource extends Resource
 {
     protected static ?string $model = Producto::class;
-
+    protected static ?string $navigationGroup = 'Inventario';
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
 
     public static function form(Form $form): Form
