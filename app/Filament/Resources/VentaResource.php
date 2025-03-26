@@ -10,6 +10,7 @@ use Filament\Forms;
 use Filament\Forms\Components\Repeater;
 use Illuminate\Support\Facades\DB;
 use App\Filament\Resources\Log;
+use App\Filament\Resources\VentaResource\Widgets\VentasWidget;
 use Dom\Text;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
@@ -32,6 +33,13 @@ class VentaResource extends Resource
     protected static ?string $navigationGroup = 'Tienda';
     protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
 
+    public static function getHeaderWidgets(): array
+    {
+        return [
+
+            VentaResource\Widgets\VentasWidget::class,
+        ];
+    }
     public static function form(Form $form): Form
     {
         return $form

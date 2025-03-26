@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\ProductoResource\Widgets\VentasWidget;
 use App\Filament\Resources\ProductoResource\Pages;
 use App\Filament\Resources\ProductoResource\RelationManagers;
+use App\Filament\Resources\VentaResource\Widgets\ProductoWidget;
 use App\Models\Producto;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
@@ -12,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Table;
+use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -20,7 +23,14 @@ class ProductoResource extends Resource
     protected static ?string $model = Producto::class;
     protected static ?string $navigationGroup = 'Inventario';
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+    public static string $resource = VentaResource::class;
 
+    public static function getHeaderWidgets(): array
+    {
+        return [
+            VentaResource\Widgets\VentasWidget::class,
+        ];
+    }
     public static function form(Form $form): Form
     {
         return $form
