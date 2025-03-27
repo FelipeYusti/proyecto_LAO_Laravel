@@ -2,17 +2,23 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ProductoResource\Widgets\VentasWidget;
 use App\Filament\Resources\ProductoResource\Pages;
 use App\Filament\Resources\ProductoResource\RelationManagers;
-use App\Filament\Resources\VentaResource\Widgets\ProductoWidget;
+use App\Filament\Resources\ProductoResource\Widgets\ProductoWidget;
 use App\Models\Producto;
+use Dompdf\Css\Color;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\Layout\Stack;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,12 +29,12 @@ class ProductoResource extends Resource
     protected static ?string $model = Producto::class;
     protected static ?string $navigationGroup = 'Inventario';
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
-    public static string $resource = VentaResource::class;
 
-    public static function getHeaderWidgets(): array
+    public static function getWidgets(): array
+
     {
         return [
-            VentaResource\Widgets\VentasWidget::class,
+            ProductoWidget::class,
         ];
     }
     public static function form(Form $form): Form
@@ -39,6 +45,10 @@ class ProductoResource extends Resource
                     ->required()
                     ->maxLength(255) // configuramos la longitud de datos que puede ingresar en el input.
                 ,
+                Forms\Components\Textarea::make('ingredientes')
+                    ->label('Ingredientes')
+                    ->required()
+                    ->maxLength(250),
                 Forms\Components\TextInput::make('precio')
                     ->numeric()
                     ->required()
@@ -47,6 +57,10 @@ class ProductoResource extends Resource
                 Forms\Components\TextInput::make('stock')
                     ->numeric()
                     ->required(),
+                Forms\Components\Textarea::make('descripcion')
+                    ->label('Descripcion del Producto')
+                    ->required()
+                    ->maxLength(250),
                 FileUpload::make('imagen')
                     ->label('Imagen del Producto')
                     ->image()
@@ -59,36 +73,54 @@ class ProductoResource extends Resource
     {
         return $table
             ->columns([
-                ImageColumn::make('imagen')
-                    ->label('Foto')
-                    ->size('50px') // Tamañano de la imagen pix
-                    ->circular() // hace que la imagen se vea cirular
-                ,
-                Tables\Columns\TextColumn::make('nombre') // referenciamos el nombre del campo de la base de datos.
-                    ->label('Prductos') // Le asignamos un nombre a la columna de 
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('precio')
-                    ->badge()
-                    ->color('info')
-                    ->money('COP'),
-                Tables\Columns\TextColumn::make('stock')
-                    ->badge()
-
-                    ->color(fn($record) => $record->stock <= 5 ? 'danger' : ($record->stock <= 15 ? 'warning' : 'success'))
-
+                Stack::make([
+                    ImageColumn::make('imagen')
+                        ->size('100px')
+                        ->circular(),
+                    Tables\Columns\TextColumn::make('nombre')
+                        ->label('Productos')
+                        ->tooltip('Nombre del Producto')
+                        ->searchable(),
+                    Tables\Columns\TextColumn::make('descripcion')
+                        ->color('warning'),
+                    Tables\Columns\TextColumn::make('precio')
+                        ->badge()
+                        ->color('info')
+                        ->money('COP')
+                        ->tooltip('Precio del Producto'),
+                    Tables\Columns\TextColumn::make('stock')
+                        ->badge()
+                        ->color(fn($record) => $record->stock <= 5 ? 'danger' : ($record->stock <= 15 ? 'warning' : 'success'))
+                        ->tooltip('Stock Disponible')
+                        ->icon(fn($record) => $record->stock <= 5 ? 'heroicon-o-exclamation-circle' : null),
+                ])->space(2),   // Espaciado entre los elementos
+            ])
+            ->contentGrid([
+                'md' => 3,
+                'xl' => 4
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('LowStock')
+                    ->query(fn($query) => $query->where('stock', '<=', 5))
+                    ->label('Bajo Stock'),
+                Tables\Filters\Filter::make('HighPrice')
+                    ->query(fn($query) => $query->where('precio', '>', 5000))
+                    ->label('Precio Alto'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ])->icon('heroicon-m-ellipsis-horizontal')->color('warning')->tooltip('Acciones')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+
+            ->defaultPaginationPageOption(12);   // Paginación de 12 tarjetas por página
     }
 
     public static function getRelations(): array

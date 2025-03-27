@@ -14,13 +14,11 @@ return new class extends Migration
     {
         Schema::create('ventas', function (Blueprint $table) {
             $table->id();
-            $table->string('cliente');
             $table->decimal('total', 10, 2);
-            $table->timestamp('fecha')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->dateTime('fecha');
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      */

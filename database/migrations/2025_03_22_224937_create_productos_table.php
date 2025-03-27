@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('nombre');
             $table->float('precio');
             $table->integer('stock');
+            $table->string('ingredientes');
+            $table->string('descripcion');
+            $table->string('imagen');
             $table->timestamps();
         });
     }

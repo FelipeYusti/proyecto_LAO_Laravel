@@ -14,10 +14,15 @@ class TestWidget extends BaseWidget
     {
         return [
             Stat::make(' Ventas', Venta::count())
-                ->description('Cantidad de ventas realizadas')
+                ->description(' Ventas realizadas')
                 ->descriptionIcon('heroicon-m-building-storefront', IconPosition::Before)
                 ->chart([1, 2, 5, 10, 15, 35])
                 ->color('info'),
+            Stat::make(' Total Ventas', Venta::sum('total'))
+                ->description('Suma de todas la ventas')
+                ->descriptionIcon('heroicon-m-currency-dollar', IconPosition::Before)
+                ->chart([1, 2, 5, 10, 15, 35])
+                ->color('success'),
             Stat::make(' Total Ventas', Venta::sum('total'))
                 ->description('Suma de todas la ventas')
                 ->descriptionIcon('heroicon-m-currency-dollar', IconPosition::Before)

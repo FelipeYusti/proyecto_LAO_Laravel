@@ -11,6 +11,7 @@ use Filament\Forms\Components\Repeater;
 use Illuminate\Support\Facades\DB;
 use App\Filament\Resources\Log;
 use App\Filament\Resources\VentaResource\Widgets\VentasWidget;
+use App\Filament\Widgets\TestWidget;
 use Dom\Text;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
@@ -20,6 +21,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ExportAction;
+use Filament\Tables\Actions\ExportBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -33,11 +36,10 @@ class VentaResource extends Resource
     protected static ?string $navigationGroup = 'Tienda';
     protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
 
-    public static function getHeaderWidgets(): array
+    public static function getWidgets(): array
     {
         return [
-
-            VentaResource\Widgets\VentasWidget::class,
+            VentasWidget::class,
         ];
     }
     public static function form(Form $form): Form
@@ -65,6 +67,7 @@ class VentaResource extends Resource
                     ]),
                 Forms\Components\DatePicker::make('fecha')
                     ->default(now()) // Fecha automática
+                    ->readOnly()
                     ->required(),
                 TextInput::make('total')
                     ->label('Total')
@@ -105,7 +108,7 @@ class VentaResource extends Resource
                         Forms\Components\TextInput::make('precio_unit')
                             ->label('Precio Unitario')
                             ->numeric()
-                            ->disabled()
+                            ->disabled()    
                             ->dehydrated()
                             ->reactive(),
                     ])
@@ -156,13 +159,19 @@ class VentaResource extends Resource
                     ->limit(30),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make()
+                ]),
 
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+
                 ]),
+
             ]);
     }
     public static function getRelations(): array
