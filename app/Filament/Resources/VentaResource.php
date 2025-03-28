@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Filament\Resources\Log;
 use App\Filament\Resources\VentaResource\Widgets\VentasWidget;
 use App\Filament\Widgets\TestWidget;
+use App\Models\Cliente;
 use Dom\Text;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
@@ -75,7 +76,8 @@ class VentaResource extends Resource
                     ->default(0)
                     ->disabled()
                     ->dehydrated()
-                    ->suffix('$')
+                    ->suffixIcon('heroicon-s-currency-dollar')
+                    ->suffixIconColor('success')
                     ->afterStateHydrated(function ($component, $state) {
                         // Formatear el valor al cargar el estado
                         $component->state(number_format($state, 2));
@@ -108,8 +110,10 @@ class VentaResource extends Resource
                         Forms\Components\TextInput::make('precio_unit')
                             ->label('Precio Unitario')
                             ->numeric()
-                            ->disabled()    
+                            ->disabled()
                             ->dehydrated()
+                            ->suffixIcon('heroicon-m-banknotes')
+                            ->suffixIconColor('success')
                             ->reactive(),
                     ])
 
@@ -146,6 +150,7 @@ class VentaResource extends Resource
                     ->formatStateUsing(fn($record) => '$' . number_format($record->total, 2)),
                 TextColumn::make('detalles')
                     ->label('Resumen de Compra')
+                    //fn es una forma corta de definir funciones anónimas en PHP,
                     ->getStateUsing(fn($record) => $record->productos->count() > 0
                         ? $record->productos
                         ->map(fn($p) => "{$p->nombre} ({$p->pivot->cantidad})")
