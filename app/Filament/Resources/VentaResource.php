@@ -43,6 +43,7 @@ class VentaResource extends Resource
             VentasWidget::class,
         ];
     }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -105,6 +106,8 @@ class VentaResource extends Resource
                             ->label('Cantidad')
                             ->numeric()
                             ->minValue(1)
+                            // validamos que no pueda hacer una venta si la cantiada es mayor al stock.
+                            ->maxValue(fn($get) => Producto::find($get('producto_id'))?->stock ?? 0)
                             ->required()
                             ->reactive(),
                         Forms\Components\TextInput::make('precio_unit')
@@ -116,7 +119,6 @@ class VentaResource extends Resource
                             ->suffixIconColor('success')
                             ->reactive(),
                     ])
-
                     ->afterStateUpdated(function ($state, $set) {
                         // Calcular el total
                         $total = collect($state)->sum(function ($item) {
@@ -131,7 +133,7 @@ class VentaResource extends Resource
                     ->defaultItems(1)
             ],);
     }
-
+   
     public static function table(Table $table): Table
     {
         return $table
@@ -167,16 +169,13 @@ class VentaResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make()
                 ]),
 
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-
                 ]),
-
             ]);
     }
     public static function getRelations(): array
