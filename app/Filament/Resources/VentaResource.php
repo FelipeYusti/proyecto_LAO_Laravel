@@ -35,7 +35,7 @@ class VentaResource extends Resource
 {
     protected static ?string $model = Venta::class;
     protected static ?string $navigationGroup = 'Tienda';
-    protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
+    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
 
     public static function getWidgets(): array
     {

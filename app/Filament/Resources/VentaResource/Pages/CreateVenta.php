@@ -14,24 +14,13 @@ class CreateVenta extends CreateRecord
     {
         // Obtener el ID del producto y la cantidad vendida
         $detalles = $this->data['detalles'];
-        foreach ($detalles as $val) {
-            echo 'id producto:' . $val['producto_id'];
-            echo 'cantidad:' .  $val['cantidad'];
+        foreach ($detalles as $val) {;
+            $this->actualizarStock($val['producto_id'], $val['cantidad']);
         };
-        $productoId = $detalles['producto_id'];
-        $cantidadVendida = $detalles['cantidad'];
-
-        // Actualizar el stock
-        $this->actualizarStock($productoId, $cantidadVendida);
     }
 
     private function actualizarStock($productoId, $cantidadVendida)
     {
-        // Lógica para actualizar el stock (similar al paso 2)
-        $producto = Producto::find($productoId);
-        $nuevoStock = $producto->stock - $cantidadVendida;
-
-        // Actualizar el stock
-        $producto->update(['stock' => $nuevoStock]);
+        Producto::find($productoId)->decrement('stock', $cantidadVendida);
     }
 }
