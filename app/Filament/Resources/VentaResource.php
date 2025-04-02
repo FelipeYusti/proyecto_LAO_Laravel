@@ -121,8 +121,9 @@ class VentaResource extends Resource
                     ])
                     ->afterStateUpdated(function ($state, $set) {
                         // Calcular el total
-                        $total = collect($state)->sum(function ($item) {
-                            return $item['cantidad'] * $item['precio_unit'];
+
+                        $total = collect($state)->sum(function ($item) {;
+                            return   intval($item['cantidad'])  *  intval($item['precio_unit']);
                         });
 
                         $set('total', $total ? number_format($total, 0, '.', '') : 0); // Actualizar el campo total
@@ -133,7 +134,7 @@ class VentaResource extends Resource
                     ->defaultItems(1)
             ],);
     }
-   
+
     public static function table(Table $table): Table
     {
         return $table
