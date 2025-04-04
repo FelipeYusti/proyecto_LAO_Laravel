@@ -4,6 +4,8 @@ namespace App\Filament\Resources\VentaResource\Pages;
 
 use App\Filament\Resources\VentaResource;
 use App\Filament\Resources\VentaResource\Widgets\VentasWidget;
+use App\Models\Venta;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
@@ -17,7 +19,6 @@ class ListVentas extends ListRecords
         return [
             Actions\CreateAction::make()
                 ->icon('heroicon-m-plus'),
-                
         ];
     }
     protected function getHeaderWidgets(): array

@@ -4,7 +4,9 @@ namespace App\Providers\Filament;
 
 use App\Filament\Resources\VentaResource\Widgets\VentasWidget;
 use App\Filament\Widgets\InformeWidget;
+use App\Filament\Widgets\xTblProductosWidget;
 use App\Filament\Widgets\TestWidget;
+use App\Filament\Widgets\TotalVentaWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -39,9 +41,7 @@ class AdminPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([
-                InformeWidget::class
-            ])
+            ->widgets([])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

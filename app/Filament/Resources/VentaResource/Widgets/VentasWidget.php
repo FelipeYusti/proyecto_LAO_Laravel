@@ -11,17 +11,21 @@ class VentasWidget extends BaseWidget
 {
     protected function getStats(): array
     {
+        $totalGanacia = number_format(Venta::sum('total'), '1');
+
         return [
             Stat::make('Cantidad Ventas', Venta::count())
                 ->description(' Ventas realizadas en el año actual')
-                ->descriptionIcon('heroicon-m-building-storefront', IconPosition::Before)
+                ->descriptionIcon('heroicon-o-arrow-trending-up', IconPosition::Before)
                 ->chart([1, 2, 5, 10, 15, 35])
-                ->color('info'),
-            Stat::make(' Total Ventas', Venta::sum('total'))
+                ->color('info')
+                ->icon('heroicon-o-shopping-cart'),
+            Stat::make(' Total Ventas', $totalGanacia)
                 ->description('Suma de todas la ventas')
-                ->descriptionIcon('heroicon-m-currency-dollar', IconPosition::Before)
+                ->descriptionIcon('heroicon-m-arrow-trending-up', IconPosition::Before)
                 ->chart([1, 2, 5, 10, 15, 35])
                 ->color('success')
+                ->icon('heroicon-o-currency-dollar')
         ];
     }
 }

@@ -13,6 +13,7 @@ use App\Filament\Resources\Log;
 use App\Filament\Resources\VentaResource\Widgets\VentasWidget;
 use App\Filament\Widgets\TestWidget;
 use App\Models\Cliente;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Dom\Text;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
@@ -22,6 +23,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Actions\ExportBulkAction;
 use Filament\Tables\Columns\TextColumn;
@@ -93,10 +95,8 @@ class VentaResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required()
-                            // actualizamos precios automaticamente
                             ->reactive()
                             ->afterStateUpdated(function ($state, callable $set) {
-                                // Obtener el precio del producto seleccionado
                                 $producto = Producto::find($state);
                                 if ($producto) {
                                     $set('precio_unit', $producto->precio);
@@ -121,7 +121,6 @@ class VentaResource extends Resource
                     ])
                     ->afterStateUpdated(function ($state, $set) {
                         // Calcular el total
-
                         $total = collect($state)->sum(function ($item) {;
                             return   intval($item['cantidad'])  *  intval($item['precio_unit']);
                         });
@@ -138,6 +137,22 @@ class VentaResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->headerActions([
+                Action::make('export_pdf')
+                    ->label('PDF')
+                    ->color('danger')
+                    ->action(function () {
+                        $ventas = Venta::all()->map(function ($venta) {
+                            $productosInfo = $venta->productos->map(function ($producto) {
+                                return "{$producto->nombre} ({$producto->pivot->cantidad})";
+                            })->join(', ');
+                            $venta->productos_info = $productosInfo;
+                            return $venta;
+                        });
+                        $pdf = Pdf::loadView('exports.venta', ['ventas' => $ventas]);
+                        return response()->streamDownload(fn() => print($pdf->output()), 'ventas.pdf');
+                    })->icon('heroicon-o-arrow-down-tray')
+            ])
             ->columns([
                 TextColumn::make('cliente.nombre')
                     ->label('Clientes')
@@ -165,6 +180,10 @@ class VentaResource extends Resource
                         ->join("\n")
                         : 'No hay productos en esta venta')
                     ->limit(30),
+            ])->filters([
+                /* Tables\Filters\Filter::make('HighPrice')
+                    ->query(fn($query) => $query->where('precio', '>', 5000))
+                    ->label('Precio Alto'), */
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([

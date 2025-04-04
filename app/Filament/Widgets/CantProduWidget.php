@@ -2,39 +2,38 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Producto_venta;
 use App\Models\Venta;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
 use Flowframe\Trend\Trend;
 use Flowframe\Trend\TrendValue;
 
-class InformeWidget extends ChartWidget
+class CantProduWidget extends ChartWidget
 {
-    protected static ?string $heading = ' Ventas por Mes';
+    protected static ?string $heading = 'Productos Vendidos';
     protected int|string|array $columnSpan = 1;
     protected static ?string $pollingInterval = '10s'; // actualizamos los datos cada 10 seegundo, para tener datos en tiempo real
     protected function getData(): array
     {
-
-        $data = Trend::model(Venta::class)
+        $data = Trend::model(Producto_venta::class)
             ->between(
-
                 start: now()->startOfYear(),
                 end: now()->endOfYear()
             )
             ->perMonth()
-            ->count();
+            ->sum('cantidad');
 
         return [
             'datasets' => [
                 [
-                    'label' => 'Ventas',
-                    'data' =>  $data->map(fn(TrendValue $venta) => $venta->aggregate), // recorremos el resultado del modelo con un map y una funcion anonima
-                    'borderColor' => 'rgb(175, 38, 255)',
+                    'label' => 'Productos',
+                    'data' =>  $data->map(fn(TrendValue $venta) => $venta->aggregate),
+                    'borderColor' => 'rgb(250, 124, 21)',
                     'fill' =>  [
                         'target' => 'origin',
-                        'above' => 'rgba(123, 27, 187, 0.28)',
-                        'below' => 'rgb(183, 0, 255)'
+                        'above' => 'rgba(216, 141, 28, 0.28)',
+                        'below' => 'rgb(250, 133, 24)'
                     ]
                 ]
             ],
