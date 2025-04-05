@@ -6,55 +6,52 @@
     <title>Reporte de Ventas</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica Neue', sans-serif;
+            color: #333;
             margin: 20px;
         }
 
         .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .logo {
-            max-width: 120px;
-        }
-
-        .title {
-            flex-grow: 1;
+            background-color: #34495e;
+            color: white;
+            padding: 20px;
             text-align: center;
-            margin: 0;
-            color: #333;
+        }
+
+        .header img {
+            max-width: 150px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         th,
         td {
             border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
+            text-align: center;
+            padding: 12px;
         }
 
         th {
-            background-color:rgb(13, 13, 14);
+            background-color: #34495e;
             color: white;
-            font-weight: bold;
         }
 
         tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: #f2f2f2;
         }
 
-        .total {
-            font-weight: bold;
-            text-align: right;
+        h1,
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 50px;
         }
     </style>
 </head>
@@ -62,28 +59,29 @@
 <body>
     <div class="header">
         <img src="{{ public_path('storage/logo/logolAO.jpg') }}" alt="Logo de la Empresa" class="logo">
-        <h2 class="title">Reporte de Ventas</h2>
+        <h1 class="title">Informe de Ventas - {{ strtoupper($informe['mes'])  }}</h1>
     </div>
-    <table>
+    <table class="summary-table">
         <thead>
             <tr>
-                <th>Cliente</th>
-                <th>Resumen de Compra</th>
-                <th>Fecha</th>
+                <th>Mes</th>
+                <th>C.Ventas</th>
+                <th>C.Productos</th>
                 <th style="text-align: center;">Total</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($ventas as $venta)
             <tr>
-                <td>{{ $venta->cliente->nombre }}</td>
-                <td>{{ $venta->productos_info}} </td>
-                <td>{{ \Carbon\Carbon::parse($venta->fecha)->format('d/m/Y')}}</td>
-                <td style="text-align: center;">${{ number_format($venta->total, 0) }}</td>
+                <td>{{ $informe['mes'] }}</td>
+                <td>{{ $informe['cantidadVenta']}} </td>
+                <td>{{ $informe ['cantidadProductos']}} </td>
+                <td style="text-align: center;">${{ number_format($informe['total'], 0) }}</td>
             </tr>
-            @endforeach
         </tbody>
     </table>
+
+    <h2 class="title">Gráfico de Productos Vendidos</h2>
+    <img src="{{ $grafica }}" alt="Gráfico de productos" style="width: 100%; max-width: 700px; margin-top: 20px;">
 </body>
 
 </html>

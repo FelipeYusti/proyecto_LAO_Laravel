@@ -14,6 +14,7 @@ use App\Filament\Resources\VentaResource\Widgets\VentasWidget;
 use App\Filament\Widgets\TestWidget;
 use App\Models\Cliente;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Dom\Text;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
@@ -21,6 +22,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Collection;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
@@ -31,6 +33,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+use Str;
 use function Illuminate\Log\log;
 
 class VentaResource extends Resource
@@ -142,15 +145,59 @@ class VentaResource extends Resource
                     ->label('PDF')
                     ->color('danger')
                     ->action(function () {
-                        $ventas = Venta::all()->map(function ($venta) {
-                            $productosInfo = $venta->productos->map(function ($producto) {
-                                return "{$producto->nombre} ({$producto->pivot->cantidad})";
-                            })->join(', ');
-                            $venta->productos_info = $productosInfo;
-                            return $venta;
-                        });
-                        $pdf = Pdf::loadView('exports.venta', ['ventas' => $ventas]);
-                        return response()->streamDownload(fn() => print($pdf->output()), 'ventas.pdf');
+
+                        $mes = request('mes', Carbon::now()->month);
+                        $nomMes = ucfirst(Carbon::create()->month($mes)->locale('es')->translatedFormat('F'));
+                        $ventas = Venta::whereMonth('fecha', $mes)->get();
+                        $resumen = [
+                            'mes' => $nomMes,
+                            'cantidadVenta' => $ventas->count(),
+                            'cantidadProductos' => $ventas->sum(fn($venta) => $venta->productos->sum('pivot.cantidad')),
+                            'total' => $ventas->sum('total')
+                        ];
+                        $resumenProd = $ventas->flatMap(fn($venta) => $venta->productos)->groupBy('nombre')->map(fn($productos) => $productos->sum('pivot.cantidad'));
+
+                        // confguramos el chart
+                        $labels = $resumenProd->keys()->toArray();
+                        $values = $resumenProd->values()->toArray();
+                        // dd($values);
+                        $chartConfig = [
+                            'type' => 'doughnut',
+                            'data' => [
+                                'labels' => $labels,
+                                'datasets' => [[
+                                    'label' => 'Productos Vendidos',
+                                    'data' => $values,
+                                    'backgroundColor' => ['#258cf9', '#9966FF', '#f22199', '#f9cc25']
+                                ]]
+                            ],
+                            'options' => [
+                                'plugins' => [
+                                    'legend' => ['display' => true]
+                                ],
+                                'scales' => [
+                                    'y' => ['min' => 0]
+                                ]
+                            ]
+                        ];
+
+                        $chartUrl = "https://quickchart.io/chart?c=" . urlencode(json_encode($chartConfig));
+                        $filename = 'chart-' . \Illuminate\Support\Str::random(8) . '.png';
+                        $chartPath = public_path('storage/charts/' . $filename);
+
+                        if (!file_exists(public_path('charts'))) {
+                            mkdir(public_path('charts'), 0755, true);
+                        }
+
+                        file_put_contents($chartPath, file_get_contents($chartUrl));
+
+                        $chartLocalPath = public_path('storage/charts/' . $filename);
+                        $data = [
+                            'informe' => $resumen,
+                            'grafica' => $chartLocalPath
+                        ];
+                        $pdf = Pdf::loadView('exports.venta', $data);
+                        return response()->streamDownload(fn() => print($pdf->output()), 'InformeVentas.pdf');
                     })->icon('heroicon-o-arrow-down-tray')
             ])
             ->columns([
@@ -183,8 +230,7 @@ class VentaResource extends Resource
             ])->filters([
                 /* Tables\Filters\Filter::make('HighPrice')
                     ->query(fn($query) => $query->where('precio', '>', 5000))
-                    ->label('Precio Alto'), */
-            ])
+                    ->label('Precio Alto'), */])
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
