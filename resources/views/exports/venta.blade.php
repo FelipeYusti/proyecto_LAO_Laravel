@@ -12,8 +12,7 @@
         }
 
         .header {
-            background-color: #34495e;
-            color: white;
+            color: black;
             padding: 20px;
             text-align: center;
         }
@@ -51,17 +50,24 @@
 
         h2 {
             text-align: center;
+            margin-top: 70px;
+        }
+
+        footer {
             margin-top: 50px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
         }
     </style>
 </head>
 
 <body>
     <div class="header">
-        <img src="{{ public_path('storage/logo/logolAO.jpg') }}" alt="Logo de la Empresa" class="logo">
+        <img src="{{ public_path('storage/logo/logoLAO01.png') }}" alt="Logo de la Empresa" class="logo">
         <h1 class="title">Informe de Ventas - {{ strtoupper($informe['mes'])  }}</h1>
     </div>
-    <table class="summary-table">
+    <table>
         <thead>
             <tr>
                 <th>Mes</th>
@@ -82,6 +88,10 @@
 
     <h2 class="title">Gráfico de Productos Vendidos</h2>
     <img src="{{ $grafica }}" alt="Gráfico de productos" style="width: 100%; max-width: 700px; margin-top: 20px;">
+
+    <footer>
+        Reporte generado automáticamente el {{ \Carbon\Carbon::now()->format('d/m/Y') }}.
+    </footer>
 </body>
 
 </html>

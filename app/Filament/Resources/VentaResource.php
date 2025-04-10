@@ -123,7 +123,7 @@ class VentaResource extends Resource
                             ->reactive(),
                     ])
                     ->afterStateUpdated(function ($state, $set) {
-                        // Calcular el total
+
                         $total = collect($state)->sum(function ($item) {;
                             return   intval($item['cantidad'])  *  intval($item['precio_unit']);
                         });
@@ -157,7 +157,7 @@ class VentaResource extends Resource
                         ];
                         $resumenProd = $ventas->flatMap(fn($venta) => $venta->productos)->groupBy('nombre')->map(fn($productos) => $productos->sum('pivot.cantidad'));
 
-                        // confguramos el chart
+
                         $labels = $resumenProd->keys()->toArray();
                         $values = $resumenProd->values()->toArray();
                         // dd($values);
@@ -168,17 +168,9 @@ class VentaResource extends Resource
                                 'datasets' => [[
                                     'label' => 'Productos Vendidos',
                                     'data' => $values,
-                                    'backgroundColor' => ['#258cf9', '#9966FF', '#f22199', '#f9cc25']
+                                    'backgroundColor' => ['#e15658', '#27c50f', '#76b7b1', '#f28e2c']
                                 ]]
                             ],
-                            'options' => [
-                                'plugins' => [
-                                    'legend' => ['display' => true]
-                                ],
-                                'scales' => [
-                                    'y' => ['min' => 0]
-                                ]
-                            ]
                         ];
 
                         $chartUrl = "https://quickchart.io/chart?c=" . urlencode(json_encode($chartConfig));
@@ -188,9 +180,7 @@ class VentaResource extends Resource
                         if (!file_exists(public_path('charts'))) {
                             mkdir(public_path('charts'), 0755, true);
                         }
-
                         file_put_contents($chartPath, file_get_contents($chartUrl));
-
                         $chartLocalPath = public_path('storage/charts/' . $filename);
                         $data = [
                             'informe' => $resumen,
