@@ -11,7 +11,7 @@ class ProductoWidget extends BaseWidget
 {
     protected function getStats(): array
     {
-        $precioPromedio = number_format(Producto::avg('precio'), '1');
+        $precioPromedio = number_format(Producto::avg('precio'), '0');
         return [
             Stat::make('Productos', Producto::count())
                 ->description('Productos Disponibles')

@@ -64,7 +64,7 @@
 
 <body>
     <div class="header">
-        <img src="{{ public_path('storage/logo/logoLAO01.png') }}" alt="Logo de la Empresa" class="logo">
+        <img src="{{ public_path('storage/logo/logolAO-sinFondo.png') }}" alt="Logo de la Empresa" class="logo">
         <h1 class="title">Informe de Ventas - {{ strtoupper($informe['mes'])  }}</h1>
     </div>
     <table>
@@ -73,7 +73,8 @@
                 <th>Mes</th>
                 <th>C.Ventas</th>
                 <th>C.Productos</th>
-                <th style="text-align: center;">Total</th>
+                <th style="text-align: center;">Total Recibido</th>
+                <th style="text-align: center;">Total Esperado</th>
             </tr>
         </thead>
         <tbody>
@@ -82,11 +83,33 @@
                 <td>{{ $informe['cantidadVenta']}} </td>
                 <td>{{ $informe ['cantidadProductos']}} </td>
                 <td style="text-align: center;">${{ number_format($informe['total'], 0) }}</td>
+                <td style="text-align: center;">${{ number_format($informe['totalRecibido'], 0) }}</td>
             </tr>
         </tbody>
     </table>
+    <!-- <H2>Productos Vendidos</H2>
+    <table>
+        <thead>
+            <tr>
+                <th>Mes</th>
+                <th>Producto</th>
+                <th>C.Productos</th>
+                <th style="text-align: center;">Total Recibido</th>
+                <th style="text-align: center;">Total Esperado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ $informe['mes'] }}</td>
+                <td>{{ $informe['cantidadVenta']}} </td>
+                <td>{{ $informe ['cantidadProductos']}} </td>
+                <td style="text-align: center;">${{ number_format($informe['total'], 0) }}</td>
+                <td style="text-align: center;">${{ number_format($informe['totalRecibido'], 0) }}</td>
+            </tr>
+        </tbody>
+    </table> -->
 
-    <h2 class="title">Gráfico de Productos Vendidos</h2>
+    <h2 class="title">Gráfico de Productos</h2>
     <img src="{{ $grafica }}" alt="Gráfico de productos" style="width: 100%; max-width: 700px; margin-top: 20px;">
 
     <footer>

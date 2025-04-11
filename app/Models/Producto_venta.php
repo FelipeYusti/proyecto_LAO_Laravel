@@ -16,14 +16,14 @@ class Producto_venta extends Pivot  // PIVOT :  Esto le dice a Laravel que Produ
         'cantidad',
         'precio_unit',
     ];
-
+   
     public function venta()
     {
-        return $this->belongsTo(Venta::class,'venta_id');
+        return $this->belongsTo(Venta::class, 'venta_id');
     }
 
     public function producto()
     {
-        return $this->belongsTo(Producto::class,'producto_id');
+        return $this->belongsTo(Producto::class, 'producto_id');
     }
 }

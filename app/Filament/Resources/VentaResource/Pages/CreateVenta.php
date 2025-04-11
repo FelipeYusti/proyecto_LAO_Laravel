@@ -10,11 +10,13 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateVenta extends CreateRecord
 {
     protected static string $resource = VentaResource::class;
+
     protected function afterCreate()
     {
-        // Obtener el ID del producto y la cantidad vendida
         $detalles = $this->data['detalles'];
-        foreach ($detalles as $val) {;
+
+        foreach ($detalles as $val) {
+
             $this->actualizarStock($val['producto_id'], $val['cantidad']);
         };
     }

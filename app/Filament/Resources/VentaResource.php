@@ -113,7 +113,12 @@ class VentaResource extends Resource
                             ->maxValue(fn($get) => Producto::find($get('producto_id'))?->stock ?? 0)
                             ->required()
                             ->reactive(),
-                        Forms\Components\TextInput::make('precio_unit')
+                        TextInput::make('dineroRecibido')
+                            ->label('Dinero Recibido')
+                            ->dehydrated(false) // evita que sea incluido en el formData
+                            ->required()
+                            ->numeric(),
+                        TextInput::make('precio_unit')
                             ->label('Precio Unitario')
                             ->numeric()
                             ->disabled()
@@ -125,7 +130,7 @@ class VentaResource extends Resource
                     ->afterStateUpdated(function ($state, $set) {
 
                         $total = collect($state)->sum(function ($item) {;
-                            return   intval($item['cantidad'])  *  intval($item['precio_unit']);
+                            return   intval($item['cantidad'])  *  intval($item['dineroRecibido']);
                         });
 
                         $set('total', $total ? number_format($total, 0, '.', '') : 0); // Actualizar el campo total
@@ -145,7 +150,6 @@ class VentaResource extends Resource
                     ->label('PDF')
                     ->color('danger')
                     ->action(function () {
-
                         $mes = request('mes', Carbon::now()->month);
                         $nomMes = ucfirst(Carbon::create()->month($mes)->locale('es')->translatedFormat('F'));
                         $ventas = Venta::whereMonth('fecha', $mes)->get();
@@ -153,11 +157,16 @@ class VentaResource extends Resource
                             'mes' => $nomMes,
                             'cantidadVenta' => $ventas->count(),
                             'cantidadProductos' => $ventas->sum(fn($venta) => $venta->productos->sum('pivot.cantidad')),
-                            'total' => $ventas->sum('total')
+                            'total' => $ventas->sum('total'),
+                            'totalRecibido' => $ventas->sum(
+                                fn($venta) =>
+                                $venta->productos->sum(
+                                    fn($producto) =>
+                                    $producto->pivot->cantidad * $producto->pivot->precio_unit
+                                )
+                            )
                         ];
                         $resumenProd = $ventas->flatMap(fn($venta) => $venta->productos)->groupBy('nombre')->map(fn($productos) => $productos->sum('pivot.cantidad'));
-
-
                         $labels = $resumenProd->keys()->toArray();
                         $values = $resumenProd->values()->toArray();
                         // dd($values);
@@ -176,7 +185,6 @@ class VentaResource extends Resource
                         $chartUrl = "https://quickchart.io/chart?c=" . urlencode(json_encode($chartConfig));
                         $filename = 'chart-' . \Illuminate\Support\Str::random(8) . '.png';
                         $chartPath = public_path('storage/charts/' . $filename);
-
                         if (!file_exists(public_path('charts'))) {
                             mkdir(public_path('charts'), 0755, true);
                         }
@@ -234,12 +242,14 @@ class VentaResource extends Resource
                 ]),
             ]);
     }
+
     public static function getRelations(): array
     {
         return [
             RelationManagers\ProductosRelationManager::class,
         ];
     }
+
 
     public static function getPages(): array
     {

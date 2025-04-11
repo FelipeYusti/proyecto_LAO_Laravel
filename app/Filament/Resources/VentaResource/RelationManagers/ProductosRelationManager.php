@@ -26,7 +26,7 @@ class ProductosRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('nombre')->label('Productos'),
                 Tables\Columns\TextColumn::make('cantidad'),
-                Tables\Columns\TextColumn::make('precio_unit'),
+                Tables\Columns\TextColumn::make('precio_unit')->label('Precio Unitario'),
             ])
             ->filters([])
             ->headerActions([])

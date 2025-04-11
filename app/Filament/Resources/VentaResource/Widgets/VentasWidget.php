@@ -11,7 +11,7 @@ class VentasWidget extends BaseWidget
 {
     protected function getStats(): array
     {
-        $totalGanacia = number_format(Venta::sum('total'), '1');
+        $totalGanacia = number_format(Venta::sum('total'), '0');
 
         return [
             Stat::make('Cantidad Ventas', Venta::count())
