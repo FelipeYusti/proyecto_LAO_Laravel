@@ -45,7 +45,7 @@
 
         h1,
         h2 {
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
 
         h2 {
@@ -75,6 +75,7 @@
                 <th>C.Productos</th>
                 <th style="text-align: center;">Total Recibido</th>
                 <th style="text-align: center;">Total Esperado</th>
+                <th style="text-align: center;">Diferencia</th>
             </tr>
         </thead>
         <tbody>
@@ -84,30 +85,31 @@
                 <td>{{ $informe ['cantidadProductos']}} </td>
                 <td style="text-align: center;">${{ number_format($informe['total'], 0) }}</td>
                 <td style="text-align: center;">${{ number_format($informe['totalRecibido'], 0) }}</td>
+                <td style="text-align: center;">${{ number_format($informe['diferencia'], 0) }}</td>
             </tr>
         </tbody>
     </table>
-    <!-- <H2>Productos Vendidos</H2>
+    <H2>Productos Vendidos</H2>
     <table>
         <thead>
             <tr>
-                <th>Mes</th>
                 <th>Producto</th>
-                <th>C.Productos</th>
-                <th style="text-align: center;">Total Recibido</th>
-                <th style="text-align: center;">Total Esperado</th>
+                <th>Cantidad</th>
+                <th style="text-align: center;">P. Untario</th>
+                <th style="text-align: center;">Total Sin Descuentos</th>
             </tr>
         </thead>
         <tbody>
+            @foreach ($productos as $producto)
             <tr>
-                <td>{{ $informe['mes'] }}</td>
-                <td>{{ $informe['cantidadVenta']}} </td>
-                <td>{{ $informe ['cantidadProductos']}} </td>
-                <td style="text-align: center;">${{ number_format($informe['total'], 0) }}</td>
-                <td style="text-align: center;">${{ number_format($informe['totalRecibido'], 0) }}</td>
+                <td>{{ $producto['nombreProducto']}} </td>
+                <td>{{ $producto ['cantidad']}} </td>
+                <td style="text-align: center;">${{ number_format($producto['precioUnitario'], 0) }}</td>
+                <td style="text-align: center;">${{ number_format($producto['total'], 0) }}</td>
             </tr>
+            @endforeach
         </tbody>
-    </table> -->
+    </table>
 
     <h2 class="title">Gráfico de Productos</h2>
     <img src="{{ $grafica }}" alt="Gráfico de productos" style="width: 100%; max-width: 700px; margin-top: 20px;">

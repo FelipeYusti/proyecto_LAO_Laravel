@@ -164,12 +164,35 @@ class VentaResource extends Resource
                                     fn($producto) =>
                                     $producto->pivot->cantidad * $producto->pivot->precio_unit
                                 )
+                            ),
+                            'diferencia' => $ventas->sum('total') - $ventas->sum(
+                                fn($venta) =>
+                                $venta->productos->sum(
+                                    fn($producto) =>
+                                    $producto->pivot->cantidad * $producto->pivot->precio_unit
+                                )
                             )
                         ];
+
+                        $productos = $ventas->flatMap(fn($venta) => $venta->productos)
+                            ->groupBy('nombre')
+                            ->map(function ($productos, $nombreProducto) {
+                                $primerProducto = $productos->first(); // Obtenemos el primer producto del grupo
+                                $precioUnitario = $primerProducto->pivot->precio_unit;
+                                return [
+                                    'nombreProducto' => $nombreProducto,
+                                    'cantidad' => $productos->sum('pivot.cantidad'),
+                                    'precioUnitario' => $precioUnitario,
+                                    'total' => $productos->sum('pivot.cantidad') * $precioUnitario
+                                ];
+                            })
+                            ->values()
+                            ->toArray();
+
                         $resumenProd = $ventas->flatMap(fn($venta) => $venta->productos)->groupBy('nombre')->map(fn($productos) => $productos->sum('pivot.cantidad'));
                         $labels = $resumenProd->keys()->toArray();
                         $values = $resumenProd->values()->toArray();
-                        // dd($values);
+                        /*     dd($resumenProd); */
                         $chartConfig = [
                             'type' => 'doughnut',
                             'data' => [
@@ -192,7 +215,8 @@ class VentaResource extends Resource
                         $chartLocalPath = public_path('storage/charts/' . $filename);
                         $data = [
                             'informe' => $resumen,
-                            'grafica' => $chartLocalPath
+                            'grafica' => $chartLocalPath,
+                            'productos' => $productos,
                         ];
                         $pdf = Pdf::loadView('exports.venta', $data);
                         return response()->streamDownload(fn() => print($pdf->output()), 'InformeVentas.pdf');
