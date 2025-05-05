@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Admin\Pages\Auth\Login;
+use App\Filament\Auth\Login as FilamentAuthLogin;
 use App\Filament\Resources\VentaResource\Widgets\VentasWidget;
 use App\Filament\Widgets\InformeWidget;
 use App\Filament\Widgets\xTblProductosWidget;
@@ -12,6 +14,7 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
+use Filament\Pages\Auth\Login as AuthLogin;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -31,7 +34,9 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(
+                \App\Filament\Auth\Login::class
+            )
             ->colors([
                 'primary' => '#6D28D9',
             ])

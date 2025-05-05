@@ -1,0 +1,7 @@
+body {
+    background: linear-gradient(to right, #0f172a, #1e293b);
+    background-image: url("/images/cancha-fondo.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
